@@ -3,12 +3,12 @@ import re
 import urllib.request
 from bs4 import BeautifulSoup as bs
 import database as db
-
+import time
 
 def load_page(page_url):
     try:
         req = urllib.request.Request(
-            page_url, headers={'User-Agent': 'Mozilla/5.0'})
+            page_url, headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'})
         html = urllib.request.urlopen(req).read()
         soup = bs(html, 'html.parser')
         return soup
@@ -28,8 +28,10 @@ def find_new_games():
 
 
 def match_details():
+    print("Getting missing matches")
     games = db.get_missing_matches()
     for g in games:
+        time.sleep(0.5)
         team = 'a'
         players = {'a_kills':0,'a_deaths':0,'a_kast':0,'a_adr':0,'a_rating':0,'b_kills':0,'b_deaths':0,'b_kast':0,'b_adr':0,'b_rating':0,'stats':1}
         try:
@@ -56,6 +58,7 @@ def match_details():
 
 
 def scrape_matches():
+    print("Scraping new matches")
     new_games = []
     offset = 0
     while(1):
@@ -69,11 +72,15 @@ def scrape_matches():
 
             a_score = clean_name(tds[1].find('span',{'class':'score'}).text)
             b_score = clean_name(tds[2].find('span',{'class':'score'}).text)
+            try:
 
-            if int(a_score) > int(b_score):
-                outcome = 1
-            else:
-                outcome = 0
+                if int(a_score) > int(b_score):
+                    outcome = 1
+                else:
+                    outcome = 0
+            except Exception as e:
+                #print("Message: %s \na_score: %s \nb_score %s" % e.message, a_score, b_score)
+                print(a_score + " "+b_score)
 
             game = {
                 'team_a': clean_name(re.sub('(.*?)', '', tds[1].text[:-3])),
@@ -85,7 +92,6 @@ def scrape_matches():
                 'date': re.sub("[^0-9]", "", tds[0].text),
                 'stats_url': tds[0].find('a', href=True)['href'],
             }
-            
             if game['team_a'] != '' and game['team_b'] != '':
                 new_team_check(game['team_a'])
                 new_team_check(game['team_b'])
@@ -94,24 +100,24 @@ def scrape_matches():
                     new_games.append(game)
                 else:
                     return new_games
-
         offset+=1
-                
 
 def upcoming_matches():
+    print("Getting upcoming matches")
     matches = []
     soup = load_page('https://www.hltv.org/')
     column = soup.find("div", { "class" : 'top-border-hide' })
     upcoming = column.find_all("div", { "class" : 'teamrows' })
-    
+    links = column.find_all('a')
+    linkIter = iter(links)
     print("\nScraping Upcoming Matches:")
     for teams in upcoming:
         t = teams.find_all("div",{'class':'teamrow'})
         team_a = clean_name(t[0].text)
         team_b = clean_name(t[1].text)
-        matches.append([team_a,team_b])
- 
-    return matches     
+        match_link = next(linkIter)['href']
+        matches.append([team_a,team_b, match_link])
+    return matches
 
 
 def new_team_check(team_name):
@@ -119,6 +125,21 @@ def new_team_check(team_name):
         team = {'team': team_name}
         db.insert_game('teams', team)
 
+
+def update_predicted_matches():
+    matches = db.get_predicted_matches_not_updated()
+    for match in matches:
+        new_game = db.get_game_by_link("graph", match['stats_url'])
+        soup = load_page('https://www.hltv.org'+new_game['stats_url'])
+        score = soup.find("div", {"class": 'standard-box teamsBox'})
+        try:
+            winner = score.find("div", {"class": 'won'}).parent['class'][0]
+            if "1" in winner:
+                db.update_predicted_game(match['stats_url'], '1')
+            else:
+                db.update_predicted_game(match['stats_url'], '2')
+        except:
+            print("No update for match", new_game['stats_url'])
 
 def clean_name(team_name):
     clean_name = re.sub('[^A-Za-z0-9]+', '', team_name)

@@ -46,7 +46,6 @@ def process_totals():
     cnt=0
     for g in games:
         try:
-            
             bar.update(cnt)
             cnt+=1
             if g['a_score'] != g['b_score']:
@@ -125,16 +124,16 @@ def process_totals():
                 
                 if teams[g[loser]]['teams'][g[winner]] < 0:
                     teams[g[loser]]['teams'][g[winner]] = 0
-                
+
                 if teams[g[winner]]['teams'][g[loser]] > MAX_VS_MATCHES:
                     teams[g[winner]]['teams'][g[loser]] = MAX_VS_MATCHES
-                
+
                 teams[g[winner]]['teams'][g['team_a']] += 1
                 teams[g[winner]]['map_wins'][g['map']] += (1 + math.log(win_score - lose_score))
                 teams[g[winner]]['stats']['rating']+=WIN_RATING_SCORE
                 teams[g[loser]]['stats']['momentum'] = round(teams[g[loser]]['stats']['momentum']/LOSS_MOMENTUM,4)
                 teams[g[winner]]['stats']['momentum'] += 1 
-                
+
         except Exception as e:
             print("### Error:",e)
             pass

@@ -3,10 +3,11 @@ import numpy as np
 import datetime
 import pandas as pd
 import time
+import re
 from warnings import filterwarnings
 filterwarnings('ignore', category = sql.Warning)
 
-con = sql.connect (host = "127.0.0.1", user = "root", passwd = "root", db = "hokkaido")
+con = sql.connect (host = "localhost", user = "matt0635", passwd = "3105", db = "hokkaido")
 con.autocommit(True)
 c = con.cursor(sql.cursors.DictCursor)
 c_np = con.cursor()
@@ -25,6 +26,12 @@ def get_game_stats(table, game_id):
 	c.execute ("SELECT * FROM %s WHERE id = %d ORDER BY id ASC LIMIT 1" % (table, game_id))	
 	return c.fetchall()
 
+def get_game_by_link(table, game_link):
+	game_link = re.sub(r"\D", "", game_link)
+	match_number = "%"+ game_link[:7] +"%"
+	qry = "SELECT * FROM %s WHERE stats_url LIKE '%s'" % (table, match_number)
+	c.execute(qry)
+	return c.fetchone()
 
 def get_most_recent_game(team):
 	query_sql = "SELECT * FROM raw WHERE team_a = '%s' OR team_b = '%s'  ORDER BY date DESC LIMIT 1" % (team,team)
@@ -126,6 +133,10 @@ def get_missing_matches():
 	c.execute(query_sql)	
 	return c.fetchall()
 
+def get_predicted_matches_not_updated():
+	qry = "SELECT * FROM graph WHERE winner = 0 ORDER BY id DESC"
+	c.execute(qry)
+	return c.fetchall()
 
 def insert_game(table, game):
 	keys = game.keys()
@@ -136,6 +147,17 @@ def insert_game(table, game):
 	values = tuple(game[key] for key in keys)
 	c_np.execute(sql, values)
 
+def insert_predicted_game(game, p1, p2):
+	percentage_a_b = "%s/%s" % (p1,p2)
+	predicted_winner = lambda t1, t2: 1 if (t1 > t2) else 2
+	values = '\'%s\',\'%s\',\'%s\',\'%s\',\'0\',\'%s\'' % (game[0], game[1], percentage_a_b, predicted_winner(p1,p2), game[2])
+	qry = 'INSERT INTO graph (team_a, team_b, percentage_a_b, predicted_outcome, winner, stats_url) VALUES (%s)' % (values)
+	c.execute(qry)
+
+
+def update_predicted_game(stat_url, outcome):
+	qry = "UPDATE graph SET winner = '%s' WHERE stats_url = '%s'" % (outcome, stat_url)
+	c.execute(qry)
 
 def update_raw(p,game_id):
 	qry = 'UPDATE raw SET a_kills = "%d", b_kills = "%d", a_deaths = "%d", b_deaths = "%d", a_adr = "%f", b_adr = "%f", a_kast = "%f", b_kast = "%f", a_rating = "%f", b_rating = "%f",stats = "%d"  WHERE id = %d' % (p['a_kills'],p['b_kills'],p['a_deaths'],p['b_deaths'],p['a_adr'],p['b_adr'],p['a_kast'],p['b_kast'],p['a_rating'],p['b_rating'],p['stats'],game_id)

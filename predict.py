@@ -54,17 +54,17 @@ def main():
                 process.stat_avg_diff(g['a_rating'], g['a_games'] ,g['b_rating'], g['b_games']),
                 g['a_ts'],
             ]
-           
             match = scaler.transform([match])
 
             outcome = mlp.predict_proba(match)
             a_pred = round(outcome[0][1],2)*100
             b_pred = round(outcome[0][0],2)*100
+            db.insert_predicted_game(m, a_pred, b_pred)
             print(m[0],'(',a_pred,')',' vs ',m[1],'(',b_pred,')')
         except Exception as e:
             pass
             #print("### Error ### " ,e)
-
+    scrape.update_predicted_matches()
 
 if __name__ == "__main__":
     main()
