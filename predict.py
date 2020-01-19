@@ -59,7 +59,7 @@ def main():
             outcome = mlp.predict_proba(match)
             a_pred = round(outcome[0][1],2)*100
             b_pred = round(outcome[0][0],2)*100
-            db.insert_predicted_game(m, a_pred, b_pred)
+            scrape.insert_predicted_match(m, a_pred, b_pred)
             print(m[0],'(',a_pred,')',' vs ',m[1],'(',b_pred,')')
         except Exception as e:
             pass

@@ -125,6 +125,12 @@ def new_team_check(team_name):
         team = {'team': team_name}
         db.insert_game('teams', team)
 
+def insert_predicted_match(game, p1, p2):
+    result = db.get_game_by_link("graph", game[2])
+    if result != None:
+        print("game already inserted")
+    else:
+        db.insert_predicted_game(game, p1, p2)
 
 def update_predicted_matches():
     matches = db.get_predicted_matches_not_updated()
