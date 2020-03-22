@@ -44,7 +44,7 @@ def match_details():
                     kast = kast.replace('-','0')
                     adr = tds[6].text.replace('-','0')
 
-                    players[team+'_kills'] += int(clean_name(re.sub('(.*?)', '', tds[1].text[:-3])))
+                    players[team+'_kills'] += int(clean_name(re.sub('[^a-zA-Z0-9 -]', '', tds[1].text[:-3])))
                     players[team+'_deaths'] += int(tds[3].text)
                     players[team+'_adr'] += round(float(adr),2)
                     players[team+'_kast'] += round(float(kast),2)
@@ -63,6 +63,7 @@ def scrape_matches():
     offset = 0
     while(1):
         page = offset * 50
+        time.sleep(0.5)
         soup = load_page('https://www.hltv.org/stats/matches?offset='+str(page))
 
         match_table = soup.find("table", { "class" : 'matches-table'})
@@ -72,19 +73,20 @@ def scrape_matches():
 
             a_score = clean_name(tds[1].find('span',{'class':'score'}).text)
             b_score = clean_name(tds[2].find('span',{'class':'score'}).text)
-            try:
 
+            try:
                 if int(a_score) > int(b_score):
                     outcome = 1
                 else:
                     outcome = 0
-            except Exception as e:
+            except Exception:
                 #print("Message: %s \na_score: %s \nb_score %s" % e.message, a_score, b_score)
-                print(a_score + " "+b_score)
+                print("Failed retrieving scores")
+
 
             game = {
-                'team_a': clean_name(re.sub('(.*?)', '', tds[1].text[:-3])),
-                'team_b': clean_name(re.sub('(.*?)', '', tds[2].text[:-3])),
+                'team_a': clean_name(re.sub('[^a-zA-Z0-9 -]', '', tds[1].text[0:-3])),
+                'team_b': clean_name(re.sub('[^a-zA-Z0-9 -]', '', tds[2].text[0:-3])),
                 'a_score':a_score,
                 'b_score':b_score,
                 'map':clean_name(tds[3].find('div',{'class':'dynamic-map-name-short'}).text),
@@ -128,9 +130,10 @@ def new_team_check(team_name):
 def insert_predicted_match(game, p1, p2):
     result = db.get_game_by_link("graph", game[2])
     if result != None:
-        print("game already inserted")
+        return False
     else:
         db.insert_predicted_game(game, p1, p2)
+        return True
 
 def update_predicted_matches():
     matches = db.get_predicted_matches_not_updated()
@@ -144,8 +147,9 @@ def update_predicted_matches():
                 db.update_predicted_game(match['stats_url'], '1')
             else:
                 db.update_predicted_game(match['stats_url'], '2')
+            print("Updated match ", new_game['stats_url'])
         except:
-            print("No update for match", new_game['stats_url'])
+            pass
 
 def clean_name(team_name):
     clean_name = re.sub('[^A-Za-z0-9]+', '', team_name)

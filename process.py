@@ -9,13 +9,14 @@ import trueskill
 from trueskill import BETA
 from trueskill.backends import cdf
 import database as db
+from numba import jit
 
 MAX_VS_MATCHES = 40
 MIN_GAMES = 5
 WIN_RATING_SCORE = 5
 LOSS_MOMENTUM = 2
 
-
+@jit(nopython=True)
 def elo(winner_elo, loser_elo):
     k = 50
     r1 = math.pow(10, float(winner_elo / 400))
@@ -26,13 +27,19 @@ def elo(winner_elo, loser_elo):
     e2 = round(loser_elo + k * (0 - r2_coe))
     return e1, e2
 
-
+@jit(nopython=True)
 def win_probability(player_rating, opponent_rating):
     delta_mu = player_rating.mu - opponent_rating.mu
     denom = sqrt(2 * (BETA * BETA) + pow(player_rating.sigma, 2) + pow(opponent_rating.sigma, 2))
     return cdf(delta_mu / denom)
 
+def win_probability_NO_GRAPHICS(player_rating, opponent_rating):
+    delta_mu = player_rating.mu - opponent_rating.mu
+    denom = sqrt(2 * (BETA * BETA) + pow(player_rating.sigma, 2) + pow(opponent_rating.sigma, 2))
+    return cdf(delta_mu / denom)
 
+# Optimize for GPU
+#@jit(nopython=True)
 def process_totals():
     db.clear_table('processed')
     teams = setup_teams()
@@ -135,12 +142,13 @@ def process_totals():
                 teams[g[winner]]['stats']['momentum'] += 1 
 
         except Exception as e:
-            print("### Error:",e)
+            #print("### Error:",e)
             pass
  
     return teams
 
-
+# Optimize for GPU
+#@jit(nopython=True)
 def make_training_set():
     print("\n\nCreating Training Set") 
     db.clear_table('games')
@@ -169,7 +177,7 @@ def make_training_set():
 
         db.insert_game('games',match)
 
-
+@jit(nopython=True)
 def stat_avg_diff(a_stat, a_games ,b_stat, b_games):
     if a_games == 0:
         a_avg = 0

@@ -7,7 +7,7 @@ import re
 from warnings import filterwarnings
 filterwarnings('ignore', category = sql.Warning)
 
-con = sql.connect (host = "localhost", user = "matt0635", passwd = "3105", db = "hokkaido")
+con = sql.connect (host = "localhost", user = "python", passwd = "matt0635", db = "hokkaido")
 con.autocommit(True)
 c = con.cursor(sql.cursors.DictCursor)
 c_np = con.cursor()

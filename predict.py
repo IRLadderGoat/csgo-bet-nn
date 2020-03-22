@@ -39,8 +39,8 @@ def main():
                 'b_momentum': teams[m[1]]['stats']['momentum'],
                 'a_rating': teams[m[0]]['stats']['rating'],
                 'b_rating': teams[m[1]]['stats']['rating'],
-                'a_ts': process.win_probability(a_ts,b_ts),
-                'b_ts': process.win_probability(b_ts,a_ts),
+                'a_ts': process.win_probability_NO_GRAPHICS(a_ts,b_ts),
+                'b_ts': process.win_probability_NO_GRAPHICS(b_ts,a_ts),
             }
 
             vs_games = g['a_vs_record'] + g['b_vs_record']
@@ -59,8 +59,11 @@ def main():
             outcome = mlp.predict_proba(match)
             a_pred = round(outcome[0][1],2)*100
             b_pred = round(outcome[0][0],2)*100
-            scrape.insert_predicted_match(m, a_pred, b_pred)
-            print(m[0],'(',a_pred,')',' vs ',m[1],'(',b_pred,')')
+            result = scrape.insert_predicted_match(m, a_pred, b_pred)
+            if (result):
+                print(m[0],'(',a_pred,')',' vs ',m[1],'(',b_pred,')')
+            else:
+                print("Game already inserted")
         except Exception as e:
             pass
             #print("### Error ### " ,e)
