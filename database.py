@@ -138,6 +138,11 @@ def get_predicted_matches_not_updated():
 	c.execute(qry)
 	return c.fetchall()
 
+def get_not_bet_matches():
+	qry = "SELECT * FROM graph WHERE winner = 0 AND bet = 0 ORDER BY id DESC"
+	c.execute(qry)
+	return c.fetchall()
+
 def insert_game(table, game):
 	keys = game.keys()
 	columns = ", ".join(keys)

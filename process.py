@@ -38,8 +38,7 @@ def win_probability_NO_GRAPHICS(player_rating, opponent_rating):
     denom = sqrt(2 * (BETA * BETA) + pow(player_rating.sigma, 2) + pow(opponent_rating.sigma, 2))
     return cdf(delta_mu / denom)
 
-# Optimize for GPU
-#@jit(nopython=True)
+# Optimize for GPU done by optimizing math functions that are used with in this function
 def process_totals():
     db.clear_table('processed')
     teams = setup_teams()
