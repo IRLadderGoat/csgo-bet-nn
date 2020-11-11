@@ -30,10 +30,13 @@ def find_new_games():
 def match_details():
     print("Getting missing matches")
     games = db.get_missing_matches()
+    gameNum = 0
+    gamesTotal = len(games)
     for g in games:
         time.sleep(0.5)
         team = 'a'
         players = {'a_kills':0,'a_deaths':0,'a_kast':0,'a_adr':0,'a_rating':0,'b_kills':0,'b_deaths':0,'b_kast':0,'b_adr':0,'b_rating':0,'stats':1}
+        print("Updated game %d out of %d total" % (gameNum, gamesTotal), end='\r')
         try:
             soup = load_page('https://www.hltv.org'+g['stats_url'])
             for tables in soup.find_all('table',{'class':'stats-table'}):
@@ -50,8 +53,8 @@ def match_details():
                     players[team+'_kast'] += round(float(kast),2)
                     players[team+'_rating'] += round(float(tds[8].text),2)
                 team = 'b'
-            print(players)
             db.update_raw(players,g['id'])
+            gameNum += 1
         except Exception as e:
             print(e)
             continue
@@ -61,6 +64,7 @@ def scrape_matches():
     print("Scraping new matches")
     new_games = []
     offset = 0
+    date = 0
     while(1):
         page = offset * 50
         time.sleep(0.5)
@@ -100,6 +104,9 @@ def scrape_matches():
 
                 if db.check_game(game) == 0:
                     new_games.append(game)
+                    if game["date"] != date:
+                        date = game["date"]
+                        print("Checking date: %s" % (date), end='\r')
                 else:
                     return new_games
         offset+=1
@@ -138,8 +145,7 @@ def insert_predicted_match(game, p1, p2):
 def update_predicted_matches():
     matches = db.get_predicted_matches_not_updated()
     for match in matches:
-        new_game = db.get_game_by_link("graph", match['stats_url'])
-        soup = load_page('https://www.hltv.org'+new_game['stats_url'])
+        soup = load_page('https://www.hltv.org'+match['stats_url'])
         score = soup.find("div", {"class": 'standard-box teamsBox'})
         try:
             winner = score.find("div", {"class": 'won'}).parent['class'][0]
@@ -147,7 +153,7 @@ def update_predicted_matches():
                 db.update_predicted_game(match['stats_url'], '1')
             else:
                 db.update_predicted_game(match['stats_url'], '2')
-            print("Updated match ", new_game['stats_url'])
+            #print("Updated match\n\t", match['stats_url'])
         except:
             pass
 

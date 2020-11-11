@@ -66,7 +66,7 @@ def main():
                 print("Game already inserted")
         except Exception as e:
             pass
-            #print("### Error ### " ,e)
+            print("### Error ### " ,e)
     scrape.update_predicted_matches()
 
 if __name__ == "__main__":
