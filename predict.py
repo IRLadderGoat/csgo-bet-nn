@@ -57,8 +57,8 @@ def main():
             match = scaler.transform([match])
 
             outcome = mlp.predict_proba(match)
-            a_pred = round(outcome[0][1],2)*100
-            b_pred = round(outcome[0][0],2)*100
+            a_pred = round(outcome[0][1]*100,2)
+            b_pred = round(outcome[0][0]*100,2)
             result = scrape.insert_predicted_match(m, a_pred, b_pred)
             if (result):
                 print(m[0],'(',a_pred,')',' vs ',m[1],'(',b_pred,')')
