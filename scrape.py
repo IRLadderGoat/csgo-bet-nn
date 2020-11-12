@@ -22,7 +22,7 @@ def load_page(page_url):
 def find_new_games():
     new_games = scrape_matches()
     new_games.reverse()
-    print("New Games:",len(new_games))
+    print("\nNew Games:",len(new_games))
     for game in new_games:
         db.insert_game('raw', game)
 

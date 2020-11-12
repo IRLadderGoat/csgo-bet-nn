@@ -27,16 +27,11 @@ def elo(winner_elo, loser_elo):
     e2 = round(loser_elo + k * (0 - r2_coe))
     return e1, e2
 
-@jit(nopython=True)
 def win_probability(player_rating, opponent_rating):
     delta_mu = player_rating.mu - opponent_rating.mu
     denom = sqrt(2 * (BETA * BETA) + pow(player_rating.sigma, 2) + pow(opponent_rating.sigma, 2))
     return cdf(delta_mu / denom)
 
-def win_probability_NO_GRAPHICS(player_rating, opponent_rating):
-    delta_mu = player_rating.mu - opponent_rating.mu
-    denom = sqrt(2 * (BETA * BETA) + pow(player_rating.sigma, 2) + pow(opponent_rating.sigma, 2))
-    return cdf(delta_mu / denom)
 
 # Optimize for GPU done by optimizing math functions that are used with in this function
 def process_totals():
@@ -46,7 +41,7 @@ def process_totals():
     match = {}
     ts = trueskill.TrueSkill(draw_probability=0)
     add_list = []
-
+    
     bar = progressbar.ProgressBar(max_value=len(games))
     print("\nProcessing Team Totals:")
     cnt=0
@@ -141,7 +136,7 @@ def process_totals():
                 teams[g[winner]]['stats']['momentum'] += 1 
 
         except Exception as e:
-            #print("### Error:",e)
+            print("### Error:",e)
             pass
  
     return teams
@@ -195,7 +190,7 @@ def stat_avg_diff(a_stat, a_games ,b_stat, b_games):
 def setup_teams():
     teams = {}
     vs_teams = {}
-    maps ={'cbl': 0, 'cch': 0, 'd2': 0, 'inf': 0,'mrg': 0, 'nuke': 0, 'ovp': 0, 'tcn': 0, 'trn': 0, 'season': 0}
+    maps ={'cbl': 0, 'cch': 0, 'd2': 0, 'inf': 0,'mrg': 0, 'nuke': 0, 'ovp': 0, 'tcn': 0, 'trn': 0, 'season': 0, 'vtg': 0}
     games = db.get_all('teams', 'id')
     for g in games:
         teams[g['team']] = MAX_VS_MATCHES / 2
