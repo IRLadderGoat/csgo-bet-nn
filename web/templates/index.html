@@ -10,7 +10,9 @@
 
     <title>Hello, world!</title>
   </head>
-   <body>
+   <body style="text-align: center;">
+        <h1>Upcoming Games</h1>
+
         <table class="table table-stripe">
             <thead>
                 <tr>
@@ -26,6 +28,8 @@
                 <td> {{total}}</td>
             </tr>
         </table>
+        <h1>Upcoming Games</h1>
+
         <table  class="table table-stripe" >
             <thead>
                 <tr>
@@ -47,6 +51,7 @@
                 </tr>
             {% endfor %}
         </table>
+        <h1>Ended Games</h1>
         <table  class="table table-stripe" >
             <thead>
                 <tr>
@@ -67,7 +72,8 @@
                   <td> {{ x.team_b }} </td>
                   <td> {{ x.predicted_outcome }} </td>
                   <td> {{ x.winner }} </td>
-                  <td> <a href="www.hltv.org{{ x.link }}"></a>Match-Info </td>
+                  {% set matchlink = 'www.hltv.org' + x.stats_url %}
+                  <td> <a href="{{ matchlink }}">Match-Info </a></td>
                 </tr>
             {% endfor %}
         </table>
