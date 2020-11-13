@@ -137,6 +137,9 @@ def new_team_check(team_name):
 def insert_predicted_match(game, p1, p2):
     result = db.get_game_by_link("graph", game[2])
     if result != None:
+        if result[2] != game[2]:
+            db.update_predicted_game(game[2], 0, new_stat_url=result[2])
+            print("Game link is wrong, updating from %s to %s" % (game[2], result[2]))
         return False
     else:
         db.insert_predicted_game(game, p1, p2)
@@ -144,19 +147,26 @@ def insert_predicted_match(game, p1, p2):
 
 def update_predicted_matches():
     matches = db.get_predicted_matches_not_updated()
+    #newest_match_id = int(list(matches.values())[len(matches)-1]['id'])
+    newest_match_id = matches[0]['id']
+
     for match in matches:
-        time.sleep(0.5)
-        soup = load_page('https://www.hltv.org'+match['stats_url'])
-        score = soup.find("div", {"class": 'standard-box teamsBox'})
-        try:
-            winner = score.find("div", {"class": 'won'}).parent['class'][0]
-            if "1" in winner:
-                db.update_predicted_game(match['stats_url'], '1')
-            else:
-                db.update_predicted_game(match['stats_url'], '2')
-            #print("Updated match\n\t", match['stats_url'])
-        except:
-            pass
+        if match['id'] + 100 < newest_match_id:
+            db.update_predicted_game(match['stats_url'], '-1')
+            print("Match with id %d has not concluded, setting as N/A" % match['id'])
+        else:
+            time.sleep(0.5)
+            soup = load_page('https://www.hltv.org'+match['stats_url'])
+            score = soup.find("div", {"class": 'standard-box teamsBox'})
+            try:
+                winner = score.find("div", {"class": 'won'}).parent['class'][0]
+                if "1" in winner:
+                    db.update_predicted_game(match['stats_url'], '1')
+                else:
+                    db.update_predicted_game(match['stats_url'], '2')
+                #print("Updated match\n\t", match['stats_url'])
+            except:
+                pass
 
 def clean_name(team_name):
     clean_name = re.sub('[^A-Za-z0-9]+', '', team_name)
@@ -169,6 +179,9 @@ def main():
     find_new_games()
     print("Fetching Match Details...\n")
     match_details()
+    print("Checking Finished Matches...\n")
+    update_predicted_matches()
+
 
 
 if __name__ == "__main__":

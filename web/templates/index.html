@@ -11,7 +11,7 @@
     <title>Hello, world!</title>
   </head>
    <body style="text-align: center;">
-        <h1>Upcoming Games</h1>
+        <h1>Statistics</h1>
 
         <table class="table table-stripe">
             <thead>
@@ -46,7 +46,7 @@
                   <td> {{ x.team_b }} </td>
                   <td> {{ x.percentage_a_b }} </td>
                   <td> {{ x.predicted_outcome }} </td>
-                  {% set matchlink = 'www.hltv.org' + x.stats_url %}
+                  {% set matchlink = 'https://www.hltv.org' + x.stats_url %}
                   <td> <a href="{{ matchlink }}">Match-Info </a></td>
                 </tr>
             {% endfor %}
@@ -72,7 +72,7 @@
                   <td> {{ x.team_b }} </td>
                   <td> {{ x.predicted_outcome }} </td>
                   <td> {{ x.winner }} </td>
-                  {% set matchlink = 'www.hltv.org' + x.stats_url %}
+                  {% set matchlink = 'https://www.hltv.org' + x.stats_url %}
                   <td> <a href="{{ matchlink }}">Match-Info </a></td>
                 </tr>
             {% endfor %}
