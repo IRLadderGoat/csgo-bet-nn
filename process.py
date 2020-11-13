@@ -9,14 +9,13 @@ import trueskill
 from trueskill import BETA
 from trueskill.backends import cdf
 import database as db
-from numba import jit
+
 
 MAX_VS_MATCHES = 40
 MIN_GAMES = 5
 WIN_RATING_SCORE = 5
 LOSS_MOMENTUM = 2
 
-@jit(nopython=True)
 def elo(winner_elo, loser_elo):
     k = 50
     r1 = math.pow(10, float(winner_elo / 400))
@@ -142,7 +141,6 @@ def process_totals():
     return teams
 
 # Optimize for GPU
-#@jit(nopython=True)
 def make_training_set():
     print("\n\nCreating Training Set") 
     db.clear_table('games')
@@ -171,7 +169,6 @@ def make_training_set():
 
         db.insert_game('games',match)
 
-@jit(nopython=True)
 def stat_avg_diff(a_stat, a_games ,b_stat, b_games):
     if a_games == 0:
         a_avg = 0

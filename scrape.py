@@ -145,6 +145,7 @@ def insert_predicted_match(game, p1, p2):
 def update_predicted_matches():
     matches = db.get_predicted_matches_not_updated()
     for match in matches:
+        time.sleep(0.5)
         soup = load_page('https://www.hltv.org'+match['stats_url'])
         score = soup.find("div", {"class": 'standard-box teamsBox'})
         try:

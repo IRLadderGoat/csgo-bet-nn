@@ -39,8 +39,8 @@ def main():
                 'b_momentum': teams[m[1]]['stats']['momentum'],
                 'a_rating': teams[m[0]]['stats']['rating'],
                 'b_rating': teams[m[1]]['stats']['rating'],
-                'a_ts': process.win_probability_NO_GRAPHICS(a_ts,b_ts),
-                'b_ts': process.win_probability_NO_GRAPHICS(b_ts,a_ts),
+                'a_ts': process.win_probability(a_ts,b_ts),
+                'b_ts': process.win_probability(b_ts,a_ts),
             }
 
             vs_games = g['a_vs_record'] + g['b_vs_record']
