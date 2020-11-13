@@ -42,11 +42,11 @@
                   <td> {{ x.team_b }} </td>
                   <td> {{ x.percentage_a_b }} </td>
                   <td> {{ x.predicted_outcome }} </td>
-                  <td> <a href="www.hltv.org{{ x.link }}"></a>Match-Info </td>
+                  {% set matchlink = 'www.hltv.org' + x.stats_url %}
+                  <td> <a href="{{ matchlink }}">Match-Info </a></td>
                 </tr>
             {% endfor %}
         </table>
-
         <table  class="table table-stripe" >
             <thead>
                 <tr>
@@ -58,10 +58,10 @@
                 </tr>
             </thead>
             {% for x in ended_games %}
-                {% if x.predicted_outcome == x.winner %}
-                <tr class="table-success">...</tr>
+                {% if x.winner == x.predicted_outcome  %}
+                <tr class="table-success">
                 {% else %}
-                <tr class="table-danger">...</tr>
+                <tr class="table-danger">
                 {% endif %}
                   <td> {{ x.team_a }} </td>
                   <td> {{ x.team_b }} </td>
