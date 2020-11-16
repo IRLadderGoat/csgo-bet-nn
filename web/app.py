@@ -21,6 +21,13 @@ def entry_page():
     losses = c.fetchone()
     losses = losses['COUNT(*)']
     total = wins+losses
+    c.execute ("SELECT COUNT(*) FROM graph WHERE winner = predicted_outcome AND haveBet = 1")	
+    bet_wins = c.fetchone()
+    bet_wins = wins['COUNT(*)']
+    c.execute ("SELECT COUNT(*) FROM graph WHERE winner <> predicted_outcome AND haveBet = 1")	
+    bet_loss = c.fetchone()
+    bet_loss = wins['COUNT(*)']
+    bet_per = bet_wins/(bet_loss+bet_wins)
 
     win_per = round((wins/total)*100, 2)
     return render_template('index.html', upcoming_games=upcoming_games,
@@ -28,7 +35,8 @@ def entry_page():
                                          wins=wins,
                                          losses=losses,
                                          win_per=win_per,
-                                         total=total)
+                                         total=total,
+                                         bet_per=bet_per)
 
 if __name__ == '__main__':
    app.run(debug = True)
