@@ -23,10 +23,10 @@ def entry_page():
     total = wins+losses
     c.execute ("SELECT COUNT(*) FROM graph WHERE winner = predicted_outcome AND haveBet = 1")	
     bet_wins = c.fetchone()
-    bet_wins = wins['COUNT(*)']
+    bet_wins = bet_wins['COUNT(*)']
     c.execute ("SELECT COUNT(*) FROM graph WHERE winner <> predicted_outcome AND haveBet = 1")	
     bet_loss = c.fetchone()
-    bet_loss = wins['COUNT(*)']
+    bet_loss = bet_loss['COUNT(*)']
     bet_per = round(bet_wins/(bet_loss+bet_wins)*100, 2)
 
     win_per = round((wins/total)*100, 2)
