@@ -32,7 +32,11 @@
 
         <table  class="table table-stripe" >
             <thead>
+                {% if x.haveBet == 1  %}
+                <tr class="table-info">
+                {% else %}
                 <tr>
+                {% endif %}
                     <th scope="col"> Team A </th>
                     <th scope="col"> Team B </th>
                     <th scope="col"> % </th>
