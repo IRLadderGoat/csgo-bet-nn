@@ -46,7 +46,7 @@ def Login():
     form_username.send_keys('bumbi@live.dk')
 
     form_password = driver.find_element_by_xpath("//*[@id='main']/app-header/app-modal[2]/div/div[1]/div/section/div/app-authorization/form/div/div[2]/input")
-    form_password.send_keys('NUTH.masm1douw')
+    form_password.send_keys('PASSWORD')
 
     driver.implicitly_wait(70)
 
